@@ -4,7 +4,7 @@
   <title><![CDATA[漫步云端]]></title>
   <link href="http://javalipengfei.github.io/atom.xml" rel="self"/>
   <link href="http://javalipengfei.github.io/"/>
-  <updated>2013-10-17T15:44:54+08:00</updated>
+  <updated>2013-10-17T16:27:41+08:00</updated>
   <id>http://javalipengfei.github.io/</id>
   <author>
     <name><![CDATA[李鹏飞]]></name>
@@ -12,5 +12,15 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[美好的开始]]></title>
+    <link href="http://javalipengfei.github.io/blog/2013/10/17/mei-hao-de-kai-shi/"/>
+    <updated>2013-10-17T16:14:00+08:00</updated>
+    <id>http://javalipengfei.github.io/blog/2013/10/17/mei-hao-de-kai-shi</id>
+    <content type="html"><![CDATA[<pre><code>历尽各种磨难，查阅了无数资料，终于把这个博客搭建起来了。没什么可说的，建这个博客的目的就是我希望能把学到的、领悟到的东西积累到这个博客上，与大家交流、分享，共同提高。最后感谢开源给我们带了的美好生活。
+</code></pre>
+]]></content>
+  </entry>
   
 </feed>
