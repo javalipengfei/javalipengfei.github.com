@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[漫步云端]]></title>
+  <link href="http://javalipengfei.github.io/atom.xml" rel="self"/>
+  <link href="http://javalipengfei.github.io/"/>
+  <updated>2013-10-17T11:39:22+08:00</updated>
+  <id>http://javalipengfei.github.io/</id>
+  <author>
+    <name><![CDATA[李鹏飞]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+</feed>
