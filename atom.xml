@@ -4,7 +4,7 @@
   <title><![CDATA[漫步云端]]></title>
   <link href="http://javalipengfei.github.io/atom.xml" rel="self"/>
   <link href="http://javalipengfei.github.io/"/>
-  <updated>2013-10-25T17:14:03+08:00</updated>
+  <updated>2013-10-25T17:15:12+08:00</updated>
   <id>http://javalipengfei.github.io/</id>
   <author>
     <name><![CDATA[李鹏飞]]></name>
@@ -34,7 +34,7 @@
 
 <h4>大概流程就这样的 我们只要按照这个流程去做就可以播放出美妙的音乐了 。我们来一一接受流程的步骤</h4>
 
-<p> <!--more—--></p>
+<p> <!-- more —--></p>
 
 <h2>首先介绍客户端结构的的数据结构</h2>
 
