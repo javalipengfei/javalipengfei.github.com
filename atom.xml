@@ -4,7 +4,7 @@
   <title><![CDATA[漫步云端]]></title>
   <link href="http://javalipengfei.github.io/atom.xml" rel="self"/>
   <link href="http://javalipengfei.github.io/"/>
-  <updated>2013-10-25T17:23:32+08:00</updated>
+  <updated>2013-10-28T10:00:42+08:00</updated>
   <id>http://javalipengfei.github.io/</id>
   <author>
     <name><![CDATA[李鹏飞]]></name>
@@ -18,7 +18,7 @@
     <link href="http://javalipengfei.github.io/blog/2013/10/23/ioskai-fa-audiotoolboxkuang-jia-yin-pin-bo-fang-de-dian-di/"/>
     <updated>2013-10-23T17:24:00+08:00</updated>
     <id>http://javalipengfei.github.io/blog/2013/10/23/ioskai-fa-audiotoolboxkuang-jia-yin-pin-bo-fang-de-dian-di</id>
-    <content type="html"><![CDATA[<blockquote><h4>今天研究了一下AudioToolBox苹果的音频开发框架。在我的不懈坚持下，终于可以放出声来了。但是仅仅是能放出声，对于一个追求强大的程序员来说这只是一个开始，虽然艰难，但是开始了 哈哈，下面呈上我对AudioToolBox播放音频的理解。</h4>
+    <content type="html"><![CDATA[<blockquote><h4>今天研究了一下AudioToolBox苹果的音频开发框架。在我的不懈坚持下，终于可以放出声来了。但是仅仅是能放出声，对于一个追求强大的程序员来说这只是一个开始，虽然艰难，但是开始了 哈哈，<!--more-->下面呈上我对AudioToolBox播放音频的理解。</h4>
 
 <h4>首先写代码之前要先了解流程才能事半功倍，下面是我用我的英语(你懂的)翻译的苹果官方网站的一些资料</h4>
 
@@ -291,7 +291,7 @@ kCFRunLoopCommonModes,                           // 5
     <id>http://javalipengfei.github.io/blog/2013/10/17/mei-hao-de-kai-shi</id>
     <content type="html"><![CDATA[<blockquote><h4>历尽各种磨难，查阅了无数资料，终于把这个博客搭建起来了。仰天长啸中。。。。。。 哈哈。。。。。。</h4>
 
-<h4>为什么要建立这个博客呢：</h4>
+<h4>为什么要建立这个博客呢：<!--more--></h4>
 
 <ol>
 <li>我觉得建立一个博客，可以督导我每天都写一点东西，来记录生活、工作、学习，一个自己的生活纪录片.</li>
