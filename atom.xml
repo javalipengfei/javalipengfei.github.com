@@ -4,7 +4,7 @@
   <title><![CDATA[漫步云端]]></title>
   <link href="http://javalipengfei.github.io/atom.xml" rel="self"/>
   <link href="http://javalipengfei.github.io/"/>
-  <updated>2013-10-28T10:31:25+08:00</updated>
+  <updated>2013-10-28T19:06:24+08:00</updated>
   <id>http://javalipengfei.github.io/</id>
   <author>
     <name><![CDATA[李鹏飞]]></name>
@@ -12,6 +12,249 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ios开发 AudioToolBox框架音频播放的点滴(2)]]></title>
+    <link href="http://javalipengfei.github.io/blog/2013/10/28/ioskai-fa-audiotoolboxkuang-jia-yin-pin-bo-fang-de-dian-di-2/"/>
+    <updated>2013-10-28T17:57:00+08:00</updated>
+    <id>http://javalipengfei.github.io/blog/2013/10/28/ioskai-fa-audiotoolboxkuang-jia-yin-pin-bo-fang-de-dian-di-2</id>
+    <content type="html"><![CDATA[<h2>今天继续研究AudioToolBox的播放功能。</h2>
+
+<h3>设置流的大小和读取包的个数<!--more--></h3>
+
+<p>UInt32 maxPacketSize;</p>
+
+<p>UInt32 propertySize = sizeof (maxPacketSize);</p>
+
+<p>AudioFileGetProperty (                               // 1</p>
+
+<pre><code>aqData.mAudioFile,                               // 2
+kAudioFilePropertyPacketSizeUpperBound,          // 3
+&amp;propertySize,                                   // 4
+&amp;maxPacketSize                                   // 5
+</code></pre>
+
+<p>);</p>
+
+<p>DeriveBufferSize (                                   // 6</p>
+
+<pre><code>aqData.mDataFormat,                              // 7
+maxPacketSize,                                   // 8
+0.5,                                             // 9
+&amp;aqData.bufferByteSize,                          // 10
+&amp;aqData.mNumPacketsToRead                        // 11
+</code></pre>
+
+<p>);</p>
+
+<ol>
+<li>通过AudioFileGetProperty方法获取读取包的个数的最大值(大约)</li>
+<li>音频文件引用</li>
+<li>通过这个参数可以计算出最大的包数</li>
+<li>这个kAudioFilePropertyPacketSizeUpperBound属性的字节的大小</li>
+<li>你想播放的包的大小</li>
+<li>设置流的大小和读取包的数量</li>
+<li>你要播放数据的音频播放格式</li>
+<li>前面估计的包的最大值</li>
+<li>每个音频应该持有的秒数。</li>
+<li> 设置读取流的字节数</li>
+<li> 设置读取包的个数
+
+<h3>为包中的数据结构开辟空间</h3></li>
+</ol>
+
+
+<p>bool isFormatVBR = (                                       // 1</p>
+
+<pre><code>aqData.mDataFormat.mBytesPerPacket == 0 ||
+aqData.mDataFormat.mFramesPerPacket == 0
+</code></pre>
+
+<p>);</p>
+
+<p>if (isFormatVBR) {                                         // 2</p>
+
+<pre><code>aqData.mPacketDescs =
+  (AudioStreamPacketDescription*) malloc (
+    aqData.mNumPacketsToRead * sizeof (AudioStreamPacketDescription)
+  );
+</code></pre>
+
+<p>} else {                                                   // 3</p>
+
+<pre><code>aqData.mPacketDescs = NULL;
+</code></pre>
+
+<p>}</p>
+
+<ol>
+<li>判断音频格式是VBR的合适CBR的</li>
+<li>如果是VBR格式的，通过前面得到读取包的数量计算开辟空间的大小</li>
+<li>对于CBR格式的不需要包的数据描述</li>
+</ol>
+
+
+<h3>设置Magic Cookie(不知道怎么翻译,其实是一种特殊音频格式)</h3>
+
+<p>UInt32 cookieSize = sizeof (UInt32);                   // 1
+bool couldNotGetProperty =                             // 2</p>
+
+<pre><code>AudioFileGetPropertyInfo (                         // 3
+    aqData.mAudioFile,                             // 4
+    kAudioFilePropertyMagicCookieData,             // 5
+    &amp;cookieSize,                                   // 6
+    NULL                                           // 7
+);
+</code></pre>
+
+<p>if (!couldNotGetProperty &amp;&amp; cookieSize) {              // 8</p>
+
+<pre><code>char* magicCookie =
+    (char *) malloc (cookieSize);
+AudioFileGetProperty (                             // 9
+    aqData.mAudioFile,                             // 10
+    kAudioFilePropertyMagicCookieData,             // 11
+    &amp;cookieSize,                                   // 12
+    magicCookie                                    // 13
+);
+AudioQueueSetProperty (                            // 14
+    aqData.mQueue,                                 // 15
+    kAudioQueueProperty_MagicCookie,               // 16
+    magicCookie,                                   // 17
+    cookieSize                                     // 18
+);
+free (magicCookie);                                // 19
+</code></pre>
+
+<p>}
+1. 初始化
+2. 判断时候存在Magic Cookies
+3. 获取Cookies
+4. 参数不用说了
+5. 。。。。
+6. 。。。。
+7. 。。。
+8. 是否存在Magic cookies
+9. 开辟空间
+10. 音频文件
+11. 参数。。。。
+12. 。。。。
+13. 。。。。。
+14. 设置Magic Cookies
+。。。。。。。</p>
+
+<h3>为音频队列流开辟空间并且初始化</h3>
+
+<p>aqData.mCurrentPacket = 0;                                // 1</p>
+
+<p>for (int i = 0; i &lt; kNumberBuffers; ++i) {                // 2</p>
+
+<pre><code>AudioQueueAllocateBuffer (                            // 3
+    aqData.mQueue,                                    // 4
+    aqData.bufferByteSize,                            // 5
+    &amp;aqData.mBuffers[i]                               // 6
+); 
+HandleOutputBuffer (                                  // 7
+    &amp;aqData,                                          // 8
+    aqData.mQueue,                                    // 9
+    aqData.mBuffers[i]                                // 10
+);
+</code></pre>
+
+<p>}
+2. 开辟3个音频流的空间
+3. 开空间
+4. 音频队列
+5. 音频流的大小
+6. 存储的音频流
+7. 填充流到音频对列中
+8. 客户端对象
+9. 音频队列
+10. 音频队列流</p>
+
+<h3>设置音频队列的增益 这里是设置音量的增益</h3>
+
+<p>Float32 gain = 1.0;                                       // 1</p>
+
+<pre><code>// Optionally, allow user to override gain setting here
+</code></pre>
+
+<p>AudioQueueSetParameter (                                  // 2</p>
+
+<pre><code>aqData.mQueue,                                        // 3
+kAudioQueueParam_Volume,                              // 4
+gain                                                  // 5
+</code></pre>
+
+<p>);</p>
+
+<ol>
+<li>初始化 范围是0—1</li>
+<li>设置参数</li>
+<li>音频队列</li>
+<li>声音参数</li>
+<li>增益参数</li>
+</ol>
+
+
+<h3>开始播放音频队列</h3>
+
+<p>aqData.mIsRunning = true;                          // 1</p>
+
+<p>AudioQueueStart (                                  // 2</p>
+
+<pre><code>aqData.mQueue,                                 // 3
+NULL                                           // 4
+</code></pre>
+
+<p>);</p>
+
+<p>do {                                               // 5</p>
+
+<pre><code>CFRunLoopRunInMode (                           // 6
+    kCFRunLoopDefaultMode,                     // 7
+    0.25,                                      // 8
+    false                                      // 9
+);
+</code></pre>
+
+<p>} while (aqData.mIsRunning);</p>
+
+<p>CFRunLoopRunInMode (                               // 10</p>
+
+<pre><code>kCFRunLoopDefaultMode,
+1,
+false
+</code></pre>
+
+<p>);</p>
+
+<ol>
+<li>是否停止播放的标志</li>
+<li>开始音频队列的播放</li>
+<li>音频队列</li>
+<li>。。。</li>
+<li>以后使我的下一个研究的对象</li>
+</ol>
+
+
+<h3>清空队列 释放空间</h3>
+
+<p>AudioQueueDispose (                            // 1</p>
+
+<pre><code>aqData.mQueue,                             // 2
+true                                       // 3
+</code></pre>
+
+<p>);</p>
+
+<p>AudioFileClose (aqData.mAudioFile);            // 4</p>
+
+<p>free (aqData.mPacketDescs);</p>
+
+<h2>至此 可以播放出来声音了 但是还是会有很多问题 后面我会慢慢去优化它。</h2>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ios开发 AudioToolBox框架音频播放的点滴]]></title>
