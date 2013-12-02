@@ -4,7 +4,7 @@
   <title><![CDATA[漫步云端]]></title>
   <link href="http://javalipengfei.github.io/atom.xml" rel="self"/>
   <link href="http://javalipengfei.github.io/"/>
-  <updated>2013-12-02T18:49:23+08:00</updated>
+  <updated>2013-12-02T18:57:02+08:00</updated>
   <id>http://javalipengfei.github.io/</id>
   <author>
     <name><![CDATA[李鹏飞]]></name>
@@ -18,18 +18,18 @@
     <link href="http://javalipengfei.github.io/blog/2013/12/02/geng-qing-xiao-de-shi-tu-kong-zhi-qi-fan-yi-1/"/>
     <updated>2013-12-02T17:24:00+08:00</updated>
     <id>http://javalipengfei.github.io/blog/2013/12/02/geng-qing-xiao-de-shi-tu-kong-zhi-qi-fan-yi-1</id>
-    <content type="html"><![CDATA[<h6>作者 <a href="http://twitter.com/chriseidhof>&#8220;>Chris Eidhof</a></h6>
+    <content type="html"><![CDATA[<h4>作者 <a href="http://twitter.com/chriseidhof">Chris Eidhof</a></h4>
 
-<h5><a href="http://www.objc.io/issue-1/lighter-view-controllers.html">原文</a></h5>
+<h4><a href="http://www.objc.io/issue-1/lighter-view-controllers.html">原文</a></h4>
 
 <h4>视图控制器常常是IOS工程中最大的文件，并且它包含了一些以不必要方式存在的代码。通常，视图控制器是代码重用最少的部分。我们寻找使试图控制器变小变轻的技术，使代码提高重用，移动代码到更合适的地方。</h4>
-
-<!-- more —-->
-
 
 <h4>这是一个托管在github的一个<a href="https://github.com/objcio/issue-1-lighter-view-controllers">例子</a></h4>
 
 <h3><center>分离数据源和其他的协议</center></h3>
+
+<!-- more -->
+
 
 <h4>让视图控制器变的更轻的最好的技术就是将UITableViewDataSource的部分从你的代码中移动到自己的类中。假如你曾经一次这么做过，你将会看到模式和创建一个可以重用的类。</h4>
 

@@ -9,7 +9,7 @@
 	<meta name="author" content="李鹏飞">
 
 	
-	<meta name="description" content="Dec 2nd, 2013 更轻小的视图控制器(翻译1) 作者 &#8220;>Chris Eidhof 原文 视图控制器常常是IOS工程中最大的文件，并且它包含了一些以不必要方式存在的代码。通常，视图控制器是代码重用最少的部分。我们寻找使试图控制器变小变轻的技术，使代码提高重用， &hellip;">
+	<meta name="description" content="Dec 2nd, 2013 更轻小的视图控制器(翻译1) 作者 Chris Eidhof 原文 视图控制器常常是IOS工程中最大的文件，并且它包含了一些以不必要方式存在的代码。通常，视图控制器是代码重用最少的部分。我们寻找使试图控制器变小变轻的技术，使代码提高重用，移动代码到更合适的地方。 &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -123,157 +123,19 @@
 	</div>
 	<h1 class="title" itemprop="name"><a href="/blog/2013/12/02/geng-qing-xiao-de-shi-tu-kong-zhi-qi-fan-yi-1/" itemprop="url">更轻小的视图控制器(翻译1)</a></h1>
 	<div class="entry-content" itemprop="articleBody">
-		<h6>作者 <a href="http://twitter.com/chriseidhof>&#8220;>Chris Eidhof</a></h6>
+		<h4>作者 <a href="http://twitter.com/chriseidhof">Chris Eidhof</a></h4>
 
-<h5><a href="http://www.objc.io/issue-1/lighter-view-controllers.html">原文</a></h5>
+<h4><a href="http://www.objc.io/issue-1/lighter-view-controllers.html">原文</a></h4>
 
 <h4>视图控制器常常是IOS工程中最大的文件，并且它包含了一些以不必要方式存在的代码。通常，视图控制器是代码重用最少的部分。我们寻找使试图控制器变小变轻的技术，使代码提高重用，移动代码到更合适的地方。</h4>
-
-<!-- more —-->
-
 
 <h4>这是一个托管在github的一个<a href="https://github.com/objcio/issue-1-lighter-view-controllers">例子</a></h4>
 
 <h3><center>分离数据源和其他的协议</center></h3>
 
-<h4>让视图控制器变的更轻的最好的技术就是将UITableViewDataSource的部分从你的代码中移动到自己的类中。假如你曾经一次这么做过，你将会看到模式和创建一个可以重用的类。</h4>
-
-<h3>例如 在我们的事例工程中，有一个PhotosViewController有如下的方法</h3>
-
-<p> pragma mark Pragma</p>
-
-<ul>
-<li><p>(Photo<em>)photoAtIndexPath:(NSIndexPath</em>)indexPath {
-  return photos[(NSUInteger)indexPath.row];
-}</p></li>
-<li><p>(NSInteger)tableView:(UITableView*)tableView
-numberOfRowsInSection:(NSInteger)section {
-  return photos.count;
-}</p></li>
-<li><p>(UITableViewCell<em>)tableView:(UITableView</em>)tableView
-      cellForRowAtIndexPath:(NSIndexPath<em>)indexPath {
-  PhotoCell</em> cell = [tableView dequeueReusableCellWithIdentifier:PhotoCellIdentifier
-                                                    forIndexPath:indexPath];
-  Photo* photo = [self photoAtIndexPath:indexPath];
-  cell.label.text = photo.name;
-  return cell;
-}</p>
-
-<h4>这些代码通过数组做了一些事情。他们当中的具体的photos是被视图控制器管理的。所以让我们尝试移动与数组相关的代码到我们自己的类中。我们用一个方法块配置cell ，也可以用代理去做。根据的你的用例去选择和尝试。</h4>
-
-<p>@implementation ArrayDataSource</p></li>
-<li><p>(id)itemAtIndexPath:(NSIndexPath*)indexPath {
-  return items[(NSUInteger)indexPath.row];
-}</p></li>
-<li><p>(NSInteger)tableView:(UITableView*)tableView
-numberOfRowsInSection:(NSInteger)section {
-  return items.count;
-}</p></li>
-<li><p>(UITableViewCell<em>)tableView:(UITableView</em>)tableView
-      cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  id cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier
-                                            forIndexPath:indexPath];
-  id item = [self itemAtIndexPath:indexPath];
-  configureCellBlock(cell,item);
-  return cell;
-}</p></li>
-</ul>
-
-
-<p>@end</p>
-
-<h4>这三个方法在你的视图控制器中可以运行 并且代替ni场jain的的一个对象并且设置他的数据源。</h4>
-
-<p>void (^configureCell)(PhotoCell<em>, Photo</em>) = ^(PhotoCell<em> cell, Photo</em> photo) {
-   cell.label.text = photo.name;
-};
-photosArrayDataSource = [[ArrayDataSource alloc] initWithItems:photos</p>
-
-<pre><code>                                            cellIdentifier:PhotoCellIdentifier
-                                        configureCellBlock:configureCell];
-</code></pre>
-
-<p>self.tableView.dataSource = photosArrayDataSource;</p>
-
-<h4>现在你不用不得不担心关于便利数组位置的索引。并且无论何时你想在tableview中展是一个数组你都可以重用这段代码。你也可以实现额外的方法。例如</h4>
-
-<p>tableView:commitEditingStyle:forRowAtIndexPath: 并且分享代码到你所有的table view controllers.</p>
-
-<h4>这是一个非常漂亮的<a href="http://www.objc.io/issue-1/testing-view-controllers.html#testing-datasource">分离测试例子</a> 并且再也不用担心重写它了。</h4>
-
-<h4>在今年工作中编写的apps中，我们着重使用了核心数据。我们创建了一个简单的类代替依靠数组的牵强结果的控制器。它实现了所有的更新动画。头部内容和删除的逻辑，你可以创建这个对象的一个实例并且给他一个读写请求和一个方法快配置cell。剩下的自己就会运行。</h4>
-
-<h4>未来，这同样可以扩展协议的途径。一个明显的候选例子是UICollectionViewDataSource。这给了你极大的灵活性，如果，在开发过程中某一时刻，你决定要一个UICollectionView，而不是一个UITableView，你几乎不必在你的视图控制器改变任何东西。你甚至可以让你的数据源支持两种协议。</h4>
-
-<h3><center>移动主要逻辑到Model中去</center></h3>
-
-<h4>这是一个视图控制器中支持找到user类归档属性的代码</h4>
-
-<ul>
-<li>(void)loadPriorities {
-NSDate<em> now = [NSDate date];
-NSString</em> formatString = @&ldquo;startDate &lt;= %@ AND endDate >= %@&rdquo;;
-NSPredicate<em> predicate = [NSPredicate predicateWithFormat:formatString, now, now];
-NSSet</em> priorities = [self.user.priorities filteredSetUsingPredicate:predicate];
-self.priorities = [priorities allObjects];
-}
-
-<h4>无论无何，将这些代码移到user类的分类中去，它会变的更轻。象下面这个视图控制器的代码：</h4></li>
-<li>(void)loadPriorities {
-self.priorities = [user currentPriorities];
-}
-
-<h4>User+Extensions.m:</h4></li>
-<li>(NSArray<em>)currentPriorities {
-NSDate</em> now = [NSDate date];
-NSString<em> formatString = @&ldquo;startDate &lt;= %@ AND endDate >= %@&rdquo;;
-NSPredicate</em> predicate = [NSPredicate predicateWithFormat:formatString, now, now];
-return [[self.priorities filteredSetUsingPredicate:predicate] allObjects];
-}</li>
-</ul>
-
-
-<h4>一些代码不能被简单的移到model对象中 但是它仍然可以变的更轻通过相关的model代码。例如：</h4>
-
-<h3><center>创建一个存储类 </center></h3>
-
-<h4>在第一个版本的例子中，我们有一些加载数据从文件中并且解析它的代码。在视图控制器的代码：</h4>
-
-<ul>
-<li>(void)readArchive {
-  NSBundle<em> bundle = [NSBundle bundleForClass:[self class]];
-  NSURL </em>archiveURL = [bundle URLForResource:@&ldquo;photodata&rdquo;
-                               withExtension:@&ldquo;bin&rdquo;];
-  NSAssert(archiveURL != nil, @&ldquo;Unable to find archive in bundle.&rdquo;);
-  NSData <em>data = [NSData dataWithContentsOfURL:archiveURL
-                                       options:0
-                                         error:NULL];
-  NSKeyedUnarchiver </em>unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
-  <em>users = [unarchiver decodeObjectOfClass:[NSArray class] forKey:@&ldquo;users&rdquo;];
-  </em>photos = [unarchiver decodeObjectOfClass:[NSArray class] forKey:@&ldquo;photos&rdquo;];
-  [unarchiver finishDecoding];
-}
-
-<h4>视图控制器不必知道他是如何运转的。我们创建一个存储对象。通过分离他我们可以重用它，测试分离让我们的视图控制器更小。这个类可以实现数据加载，缓存，设置数据堆，这个类常常被成为服务层。</h4>
-
-<h3><center>将网页服务的逻辑放到模型层</center></h3>
-
-<h4>这个跟上边的是一样的话题：不要将网页服务逻辑放到视图控制器中，相反，分开到不同的类中，你的视图控制器可以掉调用方法通过回调处理，这是一个非常好的事情对于你处理所有的异常和错误</h4>
-
-<h3><center> 通讯</cetner></h3>
-
-<h4>另一件在视图控制器中经常发生的事情是与其他视图控制器，模型，和视图通信。这是一个视图控制器应该做的，他也是我们要实现的通过最少的代码。</h4>
-
-<h4>有很多好的扩展技术在视图和模型对象中通信（例如KVO 和）无论怎样 视图通信常常是很小的一部分 我们经常遇到的问题一个视图有很多状态并且与相关的其他视图控制器相关。常常  设置一个状态到一个分离的对象中并且传递他通过视图控制器，则是所有的对象都会改变状态。他的优势是它是唯一一个再一个地方 并且我们不用纠结他的回调对象的调用。</h4>
-
-<h3><center>总结</center></h3>
-
-<h4>我们已经看到了创建更小视图控制器的技术。我们不追求尽可能的应用这些技术，因为我们只有一个目标：编写可维护的代码。通过了解这些模式，我们有选择更轻的视图控制器，使他们更清楚更好。</h4></li>
-</ul>
-
 
 		
-		
+		<a href="/blog/2013/12/02/geng-qing-xiao-de-shi-tu-kong-zhi-qi-fan-yi-1/" class="more-link">阅读全文 &rarr;</a>
 	</div>
 
 </article>
