@@ -4,7 +4,7 @@
   <title><![CDATA[漫步云端]]></title>
   <link href="http://javalipengfei.github.io/atom.xml" rel="self"/>
   <link href="http://javalipengfei.github.io/"/>
-  <updated>2013-12-02T18:59:53+08:00</updated>
+  <updated>2013-12-04T16:07:21+08:00</updated>
   <id>http://javalipengfei.github.io/</id>
   <author>
     <name><![CDATA[李鹏飞]]></name>
@@ -12,6 +12,145 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[清空TableView 的代码(翻译2)]]></title>
+    <link href="http://javalipengfei.github.io/blog/2013/12/04/qing-kong-tableview-de-dai-ma-fan-yi-2/"/>
+    <updated>2013-12-04T11:56:00+08:00</updated>
+    <id>http://javalipengfei.github.io/blog/2013/12/04/qing-kong-tableview-de-dai-ma-fan-yi-2</id>
+    <content type="html"><![CDATA[<h5>作者<a href="http://twitter.com/floriankugler">Florian Kugler</a></h5>
+
+<h5>来源<a href="http://www.objc.io/issue-1/table-views.html">objc</a></h5>
+
+<h4>tableView 对一个ios应用来说是一个多功能的组件。因此。一些代码直接的或间接的跟tableView的工作有关，比如说提供数据，更新tableView、控制他的行为和选中以及命名的反应，在这篇文章，<!--more-->我门将展现的技术是保持代码简洁和更好的代码结构。</h4>
+
+<h3><center>UItableviewController VS. UIViewController </center></h3>
+
+<h4>苹果提供了UItableViewController 作为tableVIews的专用ViewControler。UItableViewController 实现了很多能帮助我们避免重复一遍一遍的写样板代码的特性。在另一个方面，UItableViewController 被限制着管理一个铺满全屏的table view，然而，在很多案例中，这些是你需要的，如果他不是你需要的，有很多方法去解决这个问题，下面我门将会展示。</h4>
+
+<h3><center>Table View Controllers 的特性</center></h3>
+
+<h4>UItableVIewController 帮助你加在table view的数据当他第一次显示的时候。具体点。他帮助切换table view的编辑模式，反映键盘通知和一些小的特性象刷新scroll 的标识清空选中区域。为了这些特性能够工作，你要调用父类的视图事件方法（例如：viewWillAppear: and viewDidAppear:）在你的子类有可能被你重写的方法。</h4>
+
+<h4>UItableViewController 有一个独特卖点就是在标准视图控制器之上。并且他支持苹果实现的滑动刷新功能。目前，这是唯一纪录的使用UIRefreshController 在tableVIewController里面。</h4>
+
+<h4>苹果液晶定义了很多元素对于标准的table view的接口行为，如果你的app同意这些标准，它将是一个非常好的想法对于使用UItableViewController 避免写样板代码。</h4>
+
+<h3><center>UItableViewControllers的限制</center></h3>
+
+<h4>UITableViewController 的view必须设置为table view。如果你决定在你的屏幕的一边设置tableview，那你就尴尬了。</h4>
+
+<h4>如果你已经定一个界面用.xib 文件，他将会非常简单转化为标准视图控制器，如果你用storyBoards，这时他会涉及到更多的步骤，通过sotryboards 你不能改变UItableViewController成为一个标准视图除非重新创建它。它意味着复制所有的内容到一个新的view controller并且再写一遍所有的东西。</h4>
+
+<h4>最后 你需要添加你在转化中丢失的特性。大部分他们都是简单的单独一行状态在viewWillAppp或者viewDidAppear。切换编辑状态需要一个编辑tableview editting的属性的 action 方法，大部分工作在于重建键盘的支持。</h4>
+
+<h4>在你按照这些方法做的时候，这有一个更简单的替代方案：分离关注点。</h4>
+
+<h3><center>子视图控制器</center></h3>
+
+<h4>相对于完全摆脱UItableViewController，你可以将UItableViewController作为子视图控制器加到别的视图控制器上。这时UItableViewController继续管理tableView 并且父视图可以管理你加在界面伤得任何你可能需要的视图。</h4>
+
+<ul>
+<li>(void)addPhotoDetailsTableView
+{
+  DetailsViewController *details = [[DetailsViewController alloc] init];
+  details.photo = self.photo;
+  details.delegate = self;
+  [self addChildViewController:details];
+  CGRect frame = self.view.bounds;
+  frame.origin.y = 110;
+  details.view.frame = frame;
+  [self.view addSubview:details.view];  <br/>
+  [details didMoveToParentViewController:self];
+}
+
+<h4>如果你用这个方式你必须建立一个通讯通道在子视图控制器和父试图控制器之间。例如，如果用户选择了一个cell在tableview，父视图控制器需要知道push另外的一个试图控制器，根据这个用例，常常使用代理协议的方式是最简洁的，你可以在父视图控制器实现这个协议。</h4></li>
+</ul>
+
+
+<p>@protocol DetailsViewControllerDelegate
+&ndash; (void)didSelectPhotoAttributeWithKey:(NSString *)key;
+@end</p>
+
+<p>@interface PhotoViewController () <DetailsViewControllerDelegate>
+@end</p>
+
+<p>@implementation PhotoViewController
+// &hellip;
+&ndash; (void)didSelectPhotoAttributeWithKey:(NSString *)key
+{</p>
+
+<pre><code>DetailViewController *controller = [[DetailViewController alloc] init];
+controller.key = key;
+[self.navigationController pushViewController:controller animated:YES];
+</code></pre>
+
+<p>}
+@end</p>
+
+<h4>正如你所看见的，这个结构会带来一些开销对于试图控制器的通信换取关注点分离和更好的可重用性完全分离。从这个用例来看，它可以让事情变的更简单或者更复杂，这取决于你的考虑和决定</h4>
+
+<h3><center> 分离关注点 </center></h3>
+
+<h4>当表视图处理有很多种，涉及不同的任务，其中交叉模型，控制器和视图之间的边界。为了防止视图控制器成为所有这些任务的地方，我们会尝试找出尽可能多的任务，尽可能在更合适的地方。这有助于可读性，可维护性和可测试性。</h4>
+
+<h4>这里描述的技术延伸和阐述后，在<a href="http://javalipengfei.github.io/blog/2013/12/02/geng-qing-xiao-de-shi-tu-kong-zhi-qi-fan-yi-1/">更轻小的视图控制器</a>演示的概念。请参考这篇文章如何因素我们的数据源和模型的逻辑。在表视图的背景下，我们将具体来看看如何视图控制器和视图之间分离关注点。</h4>
+
+<h3><center>在cell和模型对象建立沟通桥梁</center></h3>
+
+<h4>在某些时候，我们要交给我们想要显示到视图层的数据。由于我们仍然要保持模型和视图之间的明确分离，我们常常分离这个任务到tableview的数据源</h4>
+
+<ul>
+<li><p>(UITableViewCell * )tableView:(UITableView * )tableView
+       cellForRowAtIndexPath:(NSIndexPath * )indexPath
+{
+  PhotoCell * cell = [tableView dequeueReusableCellWithIdentifier:@&ldquo;PhotoCell&rdquo;];</p>
+
+<p>  Photo * photo = [self itemAtIndexPath:indexPath];
+  cell.photoTitleLabel.text = photo.name;
+  NSString* date = [self.dateFormatter stringFromDate:photo.creationDate];
+  cell.photoDateLabel.text = date;
+}</p>
+
+<h4>我们可以将数据源中杂乱的代码设计一下，我们最好把它放到cell的分类中：</h4>
+
+<p>@implementation PhotoCell (ConfigureForPhoto)</p></li>
+<li><p>(void)configureForPhoto:(Photo * )photo
+{
+  self.photoTitleLabel.text = photo.name;
+  NSString* date = [self.dateFormatter stringFromDate:photo.creationDate];
+  self.photoDateLabel.text = date;
+}</p></li>
+</ul>
+
+
+<p>@end</p>
+
+<h4>我们数据源的代码会变的特别简洁</h4>
+
+<ul>
+<li>(UITableViewCell <em>)tableView:(UITableView </em>)tableView
+       cellForRowAtIndexPath:(NSIndexPath <em>)indexPath
+{
+  PhotoCell </em>cell = [tableView dequeueReusableCellWithIdentifier:PhotoCellIdentifier];
+  [cell configureForPhoto:[self itemAtIndexPath:indexPath]];
+  return cell;
+}</li>
+</ul>
+
+
+<h4>在我们的事例代码中table view的数据源<a href="http://javalipengfei.github.io/blog/2013/12/02/geng-qing-xiao-de-shi-tu-kong-zhi-qi-fan-yi-1/">是分离出我们控制器对象的</a>，我们初始化一个配置cell的方法块。用这种方式，这个方法快变的更简单：</h4>
+
+<p>TableViewCellConfigureBlock block = ^(PhotoCell <em>cell, Photo </em>photo) {</p>
+
+<pre><code>[cell configureForPhoto:photo];
+</code></pre>
+
+<p>};</p>
+
+<h3><center>使cell重用</center></h3>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[更轻小的视图控制器(翻译1)]]></title>
