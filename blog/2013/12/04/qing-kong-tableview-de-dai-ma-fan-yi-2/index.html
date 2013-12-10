@@ -229,7 +229,94 @@ controller.key = key;
 
 <p>};</p>
 
-<h3><center>使cell重用</center></h3>
+<h3><center>cell重用</center></h3>
+
+<h4>在这个例子中，我们将介绍多种对象类型使用同一个cell类型，我们甚至可以更进一步增加cell的重用性。首先，我们定义一个使这个对象必须符合这个这个cell的类型的才能显示到cell的协议。这时我们简单的改变cell类中的配置方法来显示任何符合协议的cell。这些简单的步骤让cell从任何特定的模型对象种分离出来并且使他应用到不同的数据模型。</h4>
+
+<h3><center>在cell类别种处理cell状态</center></h3>
+
+<h4>假如我们想做一些额外的事情对于标准的变灰或者选中行为的，我们可以实现两个代理方法，他会改变点击cell的效果变成我们想要的。例如：</h4>
+
+<ul>
+<li><p>(void)tableView:(UITableView <em>)tableView
+      didHighlightRowAtIndexPath:(NSIndexPath </em>)indexPath
+{
+  PhotoCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+  cell.photoTitleLabel.shadowColor = [UIColor darkGrayColor];
+  cell.photoTitleLabel.shadowOffset = CGSizeMake(3, 3);
+}</p></li>
+<li><p>(void)tableView:(UITableView <em>)tableView
+      didUnhighlightRowAtIndexPath:(NSIndexPath </em>)indexPath
+{
+  PhotoCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+  cell.photoTitleLabel.shadowColor = nil;
+}</p></li>
+</ul>
+
+
+<h4>然而，这两个委托方法的实现又依赖于对cell是如何实现的具体知识。如果我们想换出cell或重新设计它以不同的方式，我们也要有适应的委托代码。这个实现的细节被完成通过实现这个代理方法。相反，我们应该把这个逻辑进入cell本身。</h4>
+
+<p>@implementation PhotoCell
+// &hellip;
+&ndash; (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated
+{</p>
+
+<pre><code>[super setHighlighted:highlighted animated:animated];
+if (highlighted) {
+    self.photoTitleLabel.shadowColor = [UIColor darkGrayColor];
+    self.photoTitleLabel.shadowOffset = CGSizeMake(3, 3);
+} else {
+    self.photoTitleLabel.shadowColor = nil;
+}
+</code></pre>
+
+<p>}
+@end</p>
+
+<h4>一般来说，我们努力分离视图层的详细实现从控制层，代理必须知道一个视图的不同状态，但是他可以不知道关于如何改变视图树或者如何获取一些子视图的的正确属性。所有的逻辑应该封装到视图里面，对外只需要提供一个简单的接口。</h4>
+
+<h3><center>处理多变的cell类型</center></h3>
+
+<h4>如果你有不同的cell类型在tableView，这数据源的方法很快会失控。在我们的用例应用种我们有两个不同类型，一个用来显示星级的、一个用来显示键值对的。为了分离代码处理这些cell类型，数据源方法简单的分离了专门方法的请求对于不同的cell类型。</h4>
+
+<ul>
+<li><p>(UITableViewCell <em>)tableView:(UITableView </em>)tableView<br/>
+       cellForRowAtIndexPath:(NSIndexPath <em>)indexPath
+{
+  NSString </em>key = self.keys[(NSUInteger) indexPath.row];
+  id value = [self.photo valueForKey:key];
+  UITableViewCell *cell;
+  if ([key isEqual:PhotoRatingKey]) {
+      cell = [self cellForRating:value indexPath:indexPath];
+  } else {
+      cell = [self detailCellForKey:key value:value];
+  }
+  return cell;
+}</p></li>
+<li><p>(RatingCell <em>)cellForRating:(NSNumber </em>)rating
+                  indexPath:(NSIndexPath *)indexPath
+{
+  // &hellip;
+}</p></li>
+<li><p>(UITableViewCell <em>)detailCellForKey:(NSString </em>)key
+                              value:(id)value
+{
+  // &hellip;
+}</p></li>
+</ul>
+
+
+<h3><center>表格编辑</center></h3>
+
+<h4>tableview提供了简单易用的编辑特性，允许简单的重新排序和删除cell。这这些事件中，tableview的数据源得到了代理方法的通知，因此 我们常常看到主要的逻辑在这些代理方法中去改数据。</h4>
+
+<h4>更改数据很明显使模型层的任务。模型层应该提供例如重新排序和删除的接口以便于我们可以从数据源方法调用。通过这种方法，这个控制层充当视图和模型的协调的角色，不用去知道模型层的详细实现细节。还有一个好处，这个模型层的逻辑也变的简单测试，因为他不会与其他试图控制器有交织。</h4>
+
+<h3><center>总结</center></h3>
+
+<h4>TableVIewController（或者其他控制器对象）大部分使扮演一个交流和调节的角色在模型对象和试图对象之间，如果你坚持这个思想，代理和数据源方法将会变的更小并且包含更简单的模版代码.</h4>
+
+<h4>这么做不仅仅使减少了大小和降低了TableViewController的复杂性。而且他使得主要的逻辑和视图逻辑等多了放到了合适的地方。上边和下边的控制层实现细节都封装到了一个简单的接口中，它最终使理解代码和他们之间合作变的更简单。</h4>
 </div>
 
 </article>
