@@ -4,7 +4,7 @@
   <title><![CDATA[漫步云端]]></title>
   <link href="http://javalipengfei.github.io/atom.xml" rel="self"/>
   <link href="http://javalipengfei.github.io/"/>
-  <updated>2013-12-10T17:15:22+08:00</updated>
+  <updated>2013-12-10T17:17:54+08:00</updated>
   <id>http://javalipengfei.github.io/</id>
   <author>
     <name><![CDATA[李鹏飞]]></name>
@@ -22,7 +22,7 @@
 
 <h5>来源<a href="http://www.objc.io/issue-1/table-views.html">objc</a></h5>
 
-<h4>tableView 对一个ios应用来说是一个多功能的组件。因此。一些代码直接的或间接的跟tableView的工作有关，比如说提供数据，更新tableView、控制他的行为和选中以及命名的反应，在这篇文章，<!--more-->我门将展现的技术是保持代码简洁和更好的代码结构。</h4>
+<h4>tableView 对一个ios应用来说是一个多功能的组件。因此。一些代码直接的或间接的跟tableView的工作有关，比如说提供数据，更新tableView、控制他的行为和选中以及命名的反应，在这篇文章，<!--more-->我们将展现的技术是保持代码简洁和更好的代码结构。</h4>
 
 <h3><center>UItableviewController VS. UIViewController </center></h3>
 
