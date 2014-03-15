@@ -4,7 +4,7 @@
   <title><![CDATA[漫步云端]]></title>
   <link href="http://javalipengfei.github.io/atom.xml" rel="self"/>
   <link href="http://javalipengfei.github.io/"/>
-  <updated>2014-03-15T17:59:41+08:00</updated>
+  <updated>2014-03-15T18:02:15+08:00</updated>
   <id>http://javalipengfei.github.io/</id>
   <author>
     <name><![CDATA[李鹏飞]]></name>
@@ -18,7 +18,9 @@
     <link href="http://javalipengfei.github.io/blog/2014/03/15/ce-shi-shi-tu-kong-zhi-qi/"/>
     <updated>2014-03-15T15:52:00+08:00</updated>
     <id>http://javalipengfei.github.io/blog/2014/03/15/ce-shi-shi-tu-kong-zhi-qi</id>
-    <content type="html"><![CDATA[<h3><a href="http://www.objc.io/issue-1/testing-view-controllers.html">来源</a></h3>
+    <content type="html"><![CDATA[<h4>来源<a href="http://www.objc.io/issue-1/testing-view-controllers.html">objc.</a></h4>
+
+<h4>作者 Daniel Eggert</h4>
 
 <h3>保持事情简单</h3>
 
