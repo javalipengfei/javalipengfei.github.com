@@ -4,7 +4,7 @@
   <title><![CDATA[漫步云端]]></title>
   <link href="http://javalipengfei.github.io/atom.xml" rel="self"/>
   <link href="http://javalipengfei.github.io/"/>
-  <updated>2013-12-10T17:17:54+08:00</updated>
+  <updated>2014-03-15T17:59:41+08:00</updated>
   <id>http://javalipengfei.github.io/</id>
   <author>
     <name><![CDATA[李鹏飞]]></name>
@@ -12,6 +12,84 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[测试视图控制器]]></title>
+    <link href="http://javalipengfei.github.io/blog/2014/03/15/ce-shi-shi-tu-kong-zhi-qi/"/>
+    <updated>2014-03-15T15:52:00+08:00</updated>
+    <id>http://javalipengfei.github.io/blog/2014/03/15/ce-shi-shi-tu-kong-zhi-qi</id>
+    <content type="html"><![CDATA[<h3><a href="http://www.objc.io/issue-1/testing-view-controllers.html">来源</a></h3>
+
+<h3>保持事情简单</h3>
+
+<h4>测试简单的事情就会简单，测试复杂的事情就会变得复杂。正如我们在前几篇文章中指出的，保持事情小而且简单通常来说是非常好的。同时对于测试也很有帮助。他是双赢的结果。一起来看看<a href="https://en.wikipedia.org/wiki/Test-driven_development">测试驱动开发</a>，有些人喜欢他，有些人反之。我们不会去深入细节在这里，但是我们会说一下测试驱动开发，关于在你写代码之前你写的测试为你的代码。假如你对测试驱动开发好奇的话，查阅维基百科的资料你会发现重构和测试会很好的结合在一起。<!--more--></h4>
+
+<h4>测试UI组件往往是棘手，因为这其中涉及了许多移动部件。很多时候，视图控制器交互涉及很多来自模型层和视图层的类。为了能测试这些视图控制器。我们需要隔离东西去进行。</h4>
+
+<h4>让你高兴地是，通过我们描述的使得<a href="http://javalipengfei.github.io/blog/2013/12/02/geng-qing-xiao-de-shi-tu-kong-zhi-qi-fan-yi-1/">使视图控制器变轻</a>的技术让测试变得更简单。一般来说。假如你发现一些非常难测试的地方。这就会暗示你设计的不是很合理，并且你需要重构它，再一次参考这篇文章<a href="http://javalipengfei.github.io/blog/2013/12/02/geng-qing-xiao-de-shi-tu-kong-zhi-qi-fan-yi-1/">使视图控制器变轻</a>对于那些不合理的设计。总体的设计目标是有一个清晰的关注点分离，每一个类应该只做一件事情，并且把这件事情做好。那么这是就会测试一件事情了。</h4>
+
+<h3>记住 ####:你增加越多的测试你得到的回报将会递减。首先增加简单的测试,从非常复杂的测试中分离出简单的测试，你会感觉到更舒服。</h3>
+
+<h3>Mocking</h3>
+
+<h4>当我们把事情拆分到很小的部分的时候。我们可以测试他拥有每一个类。我们测试这个类与其它类的交互。我们可以围绕这个类使用被称作mock 或者stub的测试方法。想像一个mock对象作为一个替换对象。我们测试这个类将会用替换对象代替真实对象进行交互。通过这个方法，我们可以致力于测试而且不用以来我们app的其他部分。</h4>
+
+<h4>这个app的事例有一个我们测试的数组的数据源。这些数据将会在某一时刻出现在tableviw的cell上。在测试期间，我们没有tableivew。但是通过传第一个mock tableview，这样我们可以测试数据源在没有一个真实的tableview的时候。你会在下边看到。刚开始一点混乱。但是非常的好用和简单一旦你用它几次。</h4>
+
+<h4>这最好的工具对于mocking 在Objective-c是被成为<a href="http://ocmock.org">OCMock</a>。这是一个非常成熟的项目，充分利用了Objective-C运行库的强大功能和灵活性。它把一些很酷的技巧，让通过mack 对象测试更有趣。</h4>
+
+<h4>这数据源测试将在下边展示，更多的细节就是如何发挥这一切。</h4>
+
+<h3>SenTestKit</h3>
+
+<h4>这另外一个工具是我们将会使用的测试框架。这个框架作为开发者工具的一部分：ScenTestKit 来自<a href="http://www.sente.ch/">Sentn</a>.自1997年以来这个“恐龙“”已经存在了Objective-C的开发者 &ndash; 前十年的iPhone发布。如今，它的集成在Xcode中。</h4>
+
+<h4>SenTestingKit 可以运行你的测试。通过SenTestKit，你会集成测试到你的类里面。你可以创建一个测试类为每一个你想测试的类。这个类将会有一个结尾名字在测试中。这个结尾名字会反映关于哪个类的测试。</h4>
+
+<h4>在每一个测试类里面都有一个真实执行的测试类方法。这个测试方法名字必须一test开头作为触发器去运行这个test方法。有一个唯一的——setUP和-tearDown方法你可以重写在每一个测试类中。请记住，你的测试类只是一个类：它可以帮助你组织你的测试，可以自由地添加属性和helper方法。</h4>
+
+<h4>一个漂亮的设计为测试创建一个漂亮的基类。我们放入一个合理的逻辑使我们的测试更简单更有效。导出<a href="https://github.com/objcio/issue-1-lighter-view-controllers/blob/master/PhotoDataTests/PhotoDataTestCase.h">事例工程</a>有一些简单的例子。我们不会用xcode模板去测试。我们的目标是简单高效，我们增加一个单独的.m文件。通过测试惯例有一个结尾名字。这个名字反映我们正在测试。</h4>
+
+<h3>集成Xcode</h3>
+
+<h4>测试内置到您选择的动态库以及资源包。假如你需要特别的测试资源针对你的测试。你需要将他们加入到测试的Target中，Xcode将会把他们放到资源包中。你可以取到他们通过NSBundle。这个事例工程实现了 -URLForResource:withExtension:的方法使它跟简单易用。</h4>
+
+<h4>在Xcode中每一个scheme定义了相应的测试资源。⌘-R是运行APP，⌘-U是测试。测试如果已经运行，并且你的app已经启动。测试资源将会被干扰。测试运行的方式，您的应用程序实际上推出，而测试包注入。你可能不希望您的应用程序做太多，因为它可能与测试干扰。把下面的内容到你的应用程序委托：</h4>
+
+<p>static BOOL isRunningTests(void) <strong>attribute</strong>((const));</p>
+
+<ul>
+<li><p>(BOOL)application:(UIApplication <em>)application <br/>
+      didFinishLaunchingWithOptions:(NSDictionary </em>)launchOptions
+{
+  if (isRunningTests()) {
+      return YES;
+  }</p>
+
+<p>  //
+  // Normal logic goes here
+  //</p>
+
+<p>  return YES;
+}</p></li>
+</ul>
+
+
+<p>static BOOL isRunningTests(void)
+{</p>
+
+<pre><code>NSDictionary* environment = [[NSProcessInfo processInfo] environment];
+NSString* injectBundle = environment[@"XCInjectBundle"];
+return [[injectBundle pathExtension] isEqualToString:@"octest"];
+</code></pre>
+
+<p>}</p>
+
+<h4>编辑你的scheme为你的测试提供了很大的灵活性。你可以运行脚本在测试之前或者之后。你可以有多个测试资源。这对于大型项目非常有帮助。最重要的是，你可以打开和关闭单独的测试。这对于调试非常有用的测试——仅仅记得让他们恢复原状。也请记住，你可以在你的代码和测试用例设置断点和调试器会停在那里为执行测试。</h4>
+
+<h3>下面就是代码实战了 我会在此一次博客中更新 敬请期待。。。。。。</h3>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[清空TableView 的代码(翻译2)]]></title>
