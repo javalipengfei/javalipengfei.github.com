@@ -4,7 +4,7 @@
   <title><![CDATA[漫步云端]]></title>
   <link href="http://javalipengfei.github.io/atom.xml" rel="self"/>
   <link href="http://javalipengfei.github.io/"/>
-  <updated>2014-03-15T18:04:15+08:00</updated>
+  <updated>2014-03-20T16:21:02+08:00</updated>
   <id>http://javalipengfei.github.io/</id>
   <author>
     <name><![CDATA[李鹏飞]]></name>
@@ -12,6 +12,230 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[测试视图控制器(续)]]></title>
+    <link href="http://javalipengfei.github.io/blog/2014/03/17/ce-shi-shi-tu-kong-zhi-qi-xu/"/>
+    <updated>2014-03-17T11:23:00+08:00</updated>
+    <id>http://javalipengfei.github.io/blog/2014/03/17/ce-shi-shi-tu-kong-zhi-qi-xu</id>
+    <content type="html"><![CDATA[<h3>测试数据源</h3>
+
+<h4>现在让我们开始。分离视图控制器让我们的测试变得更简单。现在我们测试<h5>ArrayyDataSource</h5>.<h4>首先。我们创建一个新的空的设置。我们把接口和实现放到同一个文件里；不需要包含任何的<h5>@interface</h5>.它会使这个文件更漂亮和简洁:<!--more--></h4>
+
+<pre><code>#import "PhotoDataTestCase.h"
+
+@interface ArrayDataSourceTest : PhotoDataTestCase
+@end
+
+@implementation ArrayDataSourceTest
+- (void)testNothing;
+{
+    STAssertTrue(YES, @"");
+}
+@end    
+</code></pre>
+
+<h4>不需要做太多的事情。这里展示的是测试基类设置。当运行这个测试的时候，这个testNothing方法将会运行。这个STAsser宏将会做检查。注意已ST开头的宏来自SenTestingKIt。这些整合在Xcode当中它会使故障显示在问题导航仪。</h4>
+
+<h3>我们的第一个测试</h3>
+
+<h4>我们替换textNothing方法通过这个例子。这是真正的测试：</h4>
+
+<pre><code>- (void)testInitializing;
+{
+    STAssertNil([[ArrayDataSource alloc] init], @"Should not be allowed.");
+
+    TableViewCellConfigureBlock block = ^(UITableViewCell *a, id b){};
+
+    id obj1 = [[ArrayDataSource alloc] initWithItems:@[]
+                                  cellIdentifier:@"foo"
+                              configureCellBlock:block];
+     STAssertNotNil(obj1, @"");
+</code></pre>
+
+<p>}</p>
+
+<h3>Mocking实践</h3>
+
+<h4>接下来。我们将会在ArrayDataSource的实现方法中测试- (UITableViewCell <em>)tableView:(UITableView </em>)tableView  cellForRowAtIndexPath:(NSIndexPath *)indexPath;这个方法。我先要创建一个- (void)testCellConfiguration;的测试方法。首先我们创建一个数据源：</h4>
+
+<pre><code>__block UITableViewCell *configuredCell = nil;
+
+__block id configuredObject = nil;
+
+TableViewCellConfigureBlock block = ^(UITableViewCell *a, id b){
+
+configuredCell = a;
+
+configuredObject = b;
+
+}
+;
+ArrayDataSource *dataSource = [[ArrayDataSource alloc]                                  initWithItems:@[@"a", @"b"]                                     cellIdentifier:@"foo"
+                                configureCellBlock:block];
+</code></pre>
+
+<h4>注意这个configureCellBlock不会存储任何希望被存储的对象这让我们非常容易测试。</h4>
+
+<h4>接下来我们会创建一个mock对象为tableVIew：</h4>
+
+<pre><code>id mockTableView = [OCMockObject mockForClass:[UITableView class]];
+</code></pre>
+
+<h4>数据源将会被调用通过dequeueReusableCellWithIdentifier:forIndexPath:在tableview中。我们会通知mock对象应该做什么当得到这个消息的时候。我们首先创建一个cell并且设置mock：</h4>
+
+<pre><code>UITableViewCell *cell = [[UITableViewCell alloc] init];
+
+NSIndexPath* indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+
+[[[mockTableView expect] andReturn:cell]
+    dequeueReusableCellWithIdentifier:@"foo"
+                         forIndexPath:indexPath];
+</code></pre>
+
+<h4>起初看起来这有些混乱。这是怎么回事，是让mock记录这个特殊的通知。这个mock不是一个tableview；我们仅仅假装它是。这个特别期望的方法允许我们去设置这个mock对象以至于当它被调用的时候我们知道发生了什么。此外。这个expect方法告诉mock的调用已经发生了。当我们在mock中之后调用-verify，假如方法没有被调用测试将会失败。这个相应的-stub方法也可以设置mock对象。但是不会在乎方法是否会被调用。</h4>
+
+<h4>现在我们要出发代码去运行。我们会调用我们想要测试的方法：</h4>
+
+<pre><code> SIndexPath* indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+
+id result = [dataSource tableView:mockTableView
+        cellForRowAtIndexPath:indexPath];
+</code></pre>
+
+<h4>这时我们会顺利测试：</h4>
+
+<pre><code>STAssertEquals(result, cell, @"Should return the dummy cell.");
+
+STAssertEquals(configuredCell, cell, @"This should have been passed to the  block.");
+
+STAssertEqualObjects(configuredObject, @"a", @"This should have been passed     to the block.");
+
+[mockTableView verify];
+</code></pre>
+
+<h4>这个STAssert测试的值将会相同。注意我们用指针对照第一个的两个测试。我们不想用—isEqual：方法。我们完全想知道这个result和cell和configuredCell是同一个对象。底仓额测试用-isEqual：并且最后我们调用了-Verify通过mock对象。注意这个例子，我们设置了mock对象通过id mockTableView = [self autoVerifiedMockForClass:[UITableView class]];</h4>
+
+<h4>这是一个方便的包装在我们的测试基类，它会自动调用，验证在测试结束。</h4>
+
+<h3><center>测试UITableview</center></h3>
+
+<h4>下面,我们来看PhotosViewControllers。他是UItableviewController的子类并且他使用我们测试的数据源。这里的代码是非常简单的。我想将要测试一下点击一个cell进入详细页面。即一个PhotoViewContorller被推入到Navigation Controller。我们将会使用mocking以便我们对其他的部分依赖更小。</h4>
+
+<h4>首先。我们创建一个UINavigationController 的对象：</h4>
+
+<pre><code> id mockNavController = [OCMockObject mockForClass:[UINavigationController class]];
+</code></pre>
+
+<h4>下一步，我们将会使用局部的mocking。我们想要我们的PhotosViewController实例返回mockNavcontroller 作为他的navigationController。我们不能直接设置navigation controller。我们可以简单的 stub 这个方法去返回我们的mockNavigation 并且转发PhotosViewController实例：</h4>
+
+<pre><code> PhotosViewController *photosViewController = [[PhotosViewController alloc] init];
+ id photosViewControllerMock = [OCMockObject    partialMockForObject:photosViewController];
+ [[[photosViewControllerMock stub] andReturn:mockNavController]     navigationController];
+</code></pre>
+
+<h4>现在，当navigationController方法调用photosViewController的时候。将会返回mockNavCOntroller。这将非常简洁和方便。</h4>
+
+<h4>我们现在告诉mock的navigation controller 我们要用它做什么。即一个详细的带有photo变量的视图控制器设置为非空值，并且push这个视图。</h4>
+
+<pre><code>UIViewController* viewController = [OCMArg checkWithBlock:^BOOL(id obj) {
+PhotoViewController *vc = obj;
+return ([vc isKindOfClass:[PhotoViewController class]] &amp;&amp;
+        (vc.photo != nil));
+}];
+[[mockNavController expect] pushViewController:viewController animated:YES];
+</code></pre>
+
+<h4>现在我们出发这个视图加载并且模拟row被点击：</h4>
+
+<pre><code>UIView *view = photosViewController.view;
+STAssertNotNil(view, @"");
+NSIndexPath* indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+[photosViewController tableView:photosViewController.tableView 
+    didSelectRowAtIndexPath:indexPath];
+</code></pre>
+
+<h4>最后我们要验证我们是否调用了mock的方法；</h4>
+
+<pre><code>[mockNavController verify];
+[photosViewControllerMock verify];
+</code></pre>
+
+<h4>我们现在已经测试了与navigation controller的互动并且创建了一个正确的视图控制器。</h4>
+
+<h4>另外。在示例工程中，我们使用了我们自己的方便的方法。</h4>
+
+<pre><code>- (id)autoVerifiedMockForClass:(Class)aClass;
+- (id)autoVerifiedPartialMockForObject:(id)object;
+</code></pre>
+
+<h4>以便于不用必须记住调用-verify方法。</h4>
+
+<h3><center>未来的可能性</center></h3>
+
+<h4>正如上面看到的。partitral mocking 是非常强大的。如果你仔细查看-[PhotosViewController setupTableView] 的源代码。你会发现如何得到一个模型对象通过app的代理：</h4>
+
+<pre><code>NSArray *photos = [AppDelegate sharedDelegate].store.sortedPhotos;
+</code></pre>
+
+<h4>上面的测试依赖这个。通过使用parital mocking 创建一个app delegate 返回预定义的数据可以打破这种依赖。像这样：</h4>
+
+<pre><code>id storeMock; // assume we've set this up
+id appDelegate = [AppDelegate sharedDelegate]
+id appDelegateMock = [OCMockObject partialMockForObject:appDelegate];
+[[[appDelegateMock stub] andReturn:storeMock] store];
+</code></pre>
+
+<h4>现在 无论何时[AppDelegate sharedDelegate].store 被调用，它都会返回sotreMock。这是一种极端的方式。确保保持你的测试越来越简单当测试特别复杂的时候。</h4>
+
+<h3><center>需要记住的事情</center></h3>
+
+<h4>partial mocks 伪造的对象一直存在他们的周围。你可以提前停止他们的行为通过调用[aMock stopMocking].大部分时间，你想要这个partial mock 保持活跃在测试时间。确保[aMock verify]在测试的结尾被调用。否则ARC 也许会更早的释放mock 。你应该尽可以能的-verify。</h4>
+
+<h3><center>测试nib的加载</center></h3>
+
+<h4>photoCell 将会在NIB设置。我们可以写一个简单的测试检测插座变量设置是否正确。让我们看一下photocell类。</h4>
+
+<pre><code>@interface PhotoCell : UITableViewCell
++ (UINib *)nib;
+@property (weak, nonatomic) IBOutlet UILabel* photoTitleLabel;
+@property (weak, nonatomic) IBOutlet UILabel* photoDateLabel;
+@end
+</code></pre>
+
+<h4>我们简单测试如下：</h4>
+
+<pre><code>@implementation PhotoCellTests
+
+- (void)testNibLoading;
+{
+    UINib *nib = [PhotoCell nib];
+    STAssertNotNil(nib, @"");
+
+    NSArray *a = [nib instantiateWithOwner:nil options:@{}];
+    STAssertEquals([a count], (NSUInteger) 1, @"");
+    PhotoCell *cell = a[0];
+    STAssertTrue([cell isMemberOfClass:[PhotoCell class]], @"");
+
+    // Check that outlets are set up correctly:
+    STAssertNotNil(cell.photoTitleLabel, @"");
+    STAssertNotNil(cell.photoDateLabel, @"");
+}
+
+@end
+</code></pre>
+
+<h4>非常基础，但是实用。</h4>
+
+<h4>一个争论是我们现实是否需要同时更新测试和类/nib 当我们改变事情的时候。答案是肯定的。我们需要估量一下针对破坏插座变量的可能性。假如你用的的是.xib文件。你会发现这是经常发生的事情。</h4>
+
+<h3><center>额外的思考</center></h3>
+
+<h4>假如你有一个持续集成的解决方案。使用测试是一个非常好的注意。细节已经超出了本文的范围。该脚本由RunUnitTests脚本触发，并有一个TEST_AFTER_BUILD环境变量。另一个有趣的话题是创建一个独立的测试包的自动化性能测试。你可以自由地做任何你想要在你的测试方法。时序某些呼叫和使用STAssert检查他们是一个特定的阈值之内将是一个选项。</h4>
+
+<h3><center>翻译的很水 要是有不对的地方 欢迎指正</center></h3>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[测试视图控制器]]></title>
@@ -30,7 +254,7 @@
 
 <h4>让你高兴地是，通过我们描述的使得<a href="http://javalipengfei.github.io/blog/2013/12/02/geng-qing-xiao-de-shi-tu-kong-zhi-qi-fan-yi-1/">使视图控制器变轻</a>的技术让测试变得更简单。一般来说。假如你发现一些非常难测试的地方。这就会暗示你设计的不是很合理，并且你需要重构它，再一次参考这篇文章<a href="http://javalipengfei.github.io/blog/2013/12/02/geng-qing-xiao-de-shi-tu-kong-zhi-qi-fan-yi-1/">使视图控制器变轻</a>对于那些不合理的设计。总体的设计目标是有一个清晰的关注点分离，每一个类应该只做一件事情，并且把这件事情做好。那么这是就会测试一件事情了。</h4>
 
-<h3>记住 ####:你增加越多的测试你得到的回报将会递减。首先增加简单的测试,从非常复杂的测试中分离出简单的测试，你会感觉到更舒服。</h3>
+<h3>记住:你增加越多的测试你得到的回报将会递减。首先增加简单的测试,从非常复杂的测试中分离出简单的测试，你会感觉到更舒服。</h3>
 
 <h3>Mocking</h3>
 
