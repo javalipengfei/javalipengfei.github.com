@@ -9,7 +9,7 @@
 	<meta name="author" content="李鹏飞">
 
 	
-	<meta name="description" content="Mar 24th, 2014 并发编程:APIs和挑战 作者 并发是指一系列任务在同一时间运行。这个即可能发生在基于时间分享管理的单核cup核心上，或者真正的并行发生在多核cup上。 OSX和IOS提供了几个不同的APIS确保并发编程。这些APIS中的每一个都有不同的能力和限制，要合理的使用他们 &hellip;">
+	<meta name="description" content="Mar 24th, 2014 并发编程:APIs和挑战 作者 并发是指一系列任务在同一时间运行。这个即可能发生在基于时间分享管理的单核cup核心上， 阅读全文 &rarr; Mar 17th, 2014 测试视图控制器(续) 测试数据源 现在让我们开始。分离视图控制器让我们的测试变得更简单。 &hellip;">
 	
 
   <!-- http://t.co/dKP3o1e -->
@@ -125,160 +125,9 @@
 	<div class="entry-content" itemprop="articleBody">
 		<h4><a href="http://twitter.com/floriankugler">作者</a></h4>
 
-<h4><a href="http://en.wikipedia.org/wiki/Concurrency_%28computer_science%29">并发</a>是指一系列任务在同一时间运行。<!---more-->这个即可能发生在基于<a href="http://en.wikipedia.org/wiki/Preemption_%28computing%29">时间分享</a>管理的单核cup核心上，或者真正的并行发生在多核cup上。</h4>
-
-<h4>OSX和IOS提供了几个不同的APIS确保并发编程。这些APIS中的每一个都有不同的能力和限制，要合理的使用他们。他们也被归为不同的抽象水平。我们的操作性可能非常的灵活，但是这同时也带来了巨大的责任把事情做好。</h4>
-
-<h4>并发编程是一个充满很多的问题和陷阱的复杂课题，并且当我们使用APIS像Grand Central Dispatch 或者NSOperationQueue的时候我们很容易忘记这些问题和陷阱。这一系列文章首先将会概述一下不同的并发APIS在OS X和IOS，然后深入研究并发编程的固有挑战,独立于特定的API的使用。</h4>
-
-<h3><center>OS X和IOS系统上的并发接口</center></h3>
-
-<h4>苹果移动设备和桌面操作系统提供了同样的接口对于并发编程。在这篇文章我们将会研究一下pthread和NSthread，Grand Central Dispatch，NSOperationQueue，和NSRunLoop。从技术上讲，run loops是古怪的出现在这个列表中。因为他们不是真正的一类。但是他们足够的相近值得我们去研究一下。</h4>
-
-<h4>我们先从低级别的APIS开始然后升级到高级别的APIS。我们选择这个方式因为高级别的APIS都是建立在低级别的APIS的。然而，当你在你的使用中选择APIS的时候。你应该还要考虑选择相反的：选择高级别的抽象APIS可以完成工作并可去可以使并发模型更简单。</h4>
-
-<h4>如果你想知道为什么我们如此持久推荐高层抽象和非常简单的并发代码,你应该读这篇文章的第二部分。</h4>
-
-<h3><center>线程</center></h3>
-
-<h4>线程是进程的的一部分，它可以独立的运行通过操作系统的调度。事实上，几乎所有的并发api在线程之上构建底层——这是真正的中央调度和操作队列。</h4>
-
-<h4>许多线程可以被执行在单核CPU在同一时间(或者视为在同一时间)。操作系统分配一些小的计算时间给每一个线程，所以多任务的时候是同时执行的。假如是多核CPU，这些线程就可以真正的并行运行，因此减轻某些工作负载所需的总时间。</h4>
-
-<h4>你可以使用在xocde上的工具Instruments中的CPU strategy view 看到你的代码或者你使用的系统代码如何被调度运行的在多核的CPU上。</h4>
-
-<h4>你要记住的一件很重要的事，你无法控制何时何地你的代码会被调度，并且何时和多长时间他开始暂停为了让别的任务运行。这种线程调度是一种非常强的技术。无论怎样，我们之后将会研究他的复杂性。</h4>
-
-<h4>先把复杂的问题放到一边，你可以使用POSIX thread APS或者Objective-C所描述的API，NSThread，去创建你自己的线程。这里有一个小例子是关于使用线程找到1百万个数中找到最大和最小的值。将会产生4个线程并行运行。下面这个例子很显然表明为什么不会直接使用pthreads。</h4>
-
-<pre><code>struct threadInfo {
-uint32_t * inputValues;
-size_t count;
-};
-
-struct threadResult {
-    uint32_t min;
-    uint32_t max;
-};
-
-void * findMinAndMax(void *arg)
-{
-    struct threadInfo const * const info = (struct threadInfo *) arg;
-    uint32_t min = UINT32_MAX;
-    uint32_t max = 0;
-    for (size_t i = 0; i &lt; info-&gt;count; ++i) {
-        uint32_t v = info-&gt;inputValues[i];
-        min = MIN(min, v);
-        max = MAX(max, v);
-    }
-    free(arg);
-    struct threadResult * const result = (struct threadResult *)    malloc(sizeof(*result));
-    result-&gt;min = min;
-    result-&gt;max = max;
-    return result;
-}
-
-int main(int argc, const char * argv[])
-{
-    size_t const count = 1000000;
-    uint32_t inputValues[count];
-
-    // Fill input values with random numbers:
-    for (size_t i = 0; i &lt; count; ++i) {
-        inputValues[i] = arc4random();
-    }
-
-    // Spawn 4 threads to find the minimum and maximum:
-    size_t const threadCount = 4;
-    pthread_t tid[threadCount];
-    for (size_t i = 0; i &lt; threadCount; ++i) {
-        struct threadInfo * const info = (struct threadInfo *)malloc(sizeof(*info));
-        size_t offset = (count / threadCount) * i;
-        info-&gt;inputValues = inputValues + offset;
-        info-&gt;count = MIN(count - offset, count / threadCount);
-        int err = pthread_create(tid + i, NULL, &amp;findMinAndMax, info);
-        NSCAssert(err == 0, @"pthread_create() failed: %d", err);
-    }
-    // Wait for the threads to exit:
-    struct threadResult * results[threadCount];
-    for (size_t i = 0; i &lt; threadCount; ++i) {
-        int err = pthread_join(tid[i], (void **) &amp;(results[i]));
-        NSCAssert(err == 0, @"pthread_join() failed: %d", err);
-    }
-    // Find the min and max:
-    uint32_t min = UINT32_MAX;
-    uint32_t max = 0;
-    for (size_t i = 0; i &lt; threadCount; ++i) {
-        min = MIN(min, results[i]-&gt;min);
-        max = MAX(max, results[i]-&gt;max);
-        free(results[i]);
-        results[i] = NULL;
-    }
-
-    NSLog(@"min = %u", min);
-    NSLog(@"max = %u", max);
-    return 0;
-    }
-</code></pre>
-
-<h4>NSThread 是Objective—c围绕phtreads的封装。这让代码看起来更像是cocoa 的环境下的。例如，你可以定义一个线程作为NSThread的子类，他将会隐藏3一些代码以至于在后台运行，之前的例子我们可以定义NSThread的子类像这样：</h4>
-
-<pre><code>@interface FindMinMaxThread : NSThread
-@property (nonatomic) NSUInteger min;
-@property (nonatomic) NSUInteger max;
-- (instancetype)initWithNumbers:(NSArray *)numbers;
-@end
-
-@implementation FindMinMaxThread {
-    NSArray *_numbers;
-}
-
-- (instancetype)initWithNumbers:(NSArray *)numbers 
-{
-    self = [super init];
-    if (self) {
-     _numbers = numbers;
-    }
-    return self;
-}
-
-- (void)main
-{
-    NSUInteger min;
-    NSUInteger max;
-    // process the data
-    self.min = min;
-    self.max = max;
-}
-@end
-</code></pre>
-
-<h4>为了启动这个线程，我们需要线程对象调用他的start方法：</h4>
-
-<pre><code>NSSet *threads = [NSMutableSet set];
-NSUInteger numberCount = self.numbers.count;
-NSUInteger threadCount = 4;
-for (NSUInteger i = 0; i &lt; threadCount; i++) {
-    NSUInteger offset = (count / threadCount) * i;
-    NSUInteger count = MIN(numberCount - offset, numberCount / threadCount);
-    NSRange range = NSMakeRange(offset, count);
-    NSArray *subset = [self.numbers subarrayWithRange:range];
-    FindMinMaxThread *thread = [[FindMinMaxThread alloc]    initWithNumbers:subset];
-    [threads addObject:thread];
-    [thread start];
-}
-</code></pre>
-
-<h4>现在我们可以通过观察thread的isFinished的属性知道何时我们新的线程结束在它评估结果之前。我们将把这个练习感兴趣的读者。重要的是使用线程pthread相对于NSThreadAPIS，是一个相对笨重的经验不适合我们的编码模型。</h4>
-
-<h4>出现一个问题,可以直接使用线程是活动线程的数量成倍增加,如果你的代码和底层框架代码生成自己的线程。这实际上是一个相当普遍的问题在大项目。例如,如果您创建8线程利用8个CPU核心,从这些线程和框架代码调用做了同样的事情(因为它不知道您已经创建的线程),您可以快速与几十个甚至几百个线程。每个代码负责任地参与本身的一部分,然而,最终的结果是有问题的。线程不免费的。每个线程内核内存和资源的关系。</h4>
-
-<h4>接下来,我们将讨论两个队列并发api:Grand Central Dispatch 和operation queues.。他们解决这个问题通过集中管理线程池,每个人都使用协作。</h4>
-
-<h3><center>未完待续。。。。。</center></h3>
-
+<h4><a href="http://en.wikipedia.org/wiki/Concurrency_%28computer_science%29">并发</a>是指一系列任务在同一时间运行。这个即可能发生在基于<a href="http://en.wikipedia.org/wiki/Preemption_%28computing%29">时间分享</a>管理的单核cup核心上，
 		
-		
+		<a href="/blog/2014/03/24/bing-fa-bian-cheng-apishe-tiao-zhan/" class="more-link">阅读全文 &rarr;</a>
 	</div>
 
 </article>
