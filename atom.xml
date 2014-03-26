@@ -4,7 +4,7 @@
   <title><![CDATA[漫步云端]]></title>
   <link href="http://javalipengfei.github.io/atom.xml" rel="self"/>
   <link href="http://javalipengfei.github.io/"/>
-  <updated>2014-03-24T19:01:30+08:00</updated>
+  <updated>2014-03-26T10:32:47+08:00</updated>
   <id>http://javalipengfei.github.io/</id>
   <author>
     <name><![CDATA[李鹏飞]]></name>
@@ -20,7 +20,7 @@
     <id>http://javalipengfei.github.io/blog/2014/03/24/bing-fa-bian-cheng-apishe-tiao-zhan</id>
     <content type="html"><![CDATA[<h4><a href="http://twitter.com/floriankugler">作者</a></h4>
 
-<h4><a href="http://en.wikipedia.org/wiki/Concurrency_%28computer_science%29">并发</a>是指一系列任务在同一时间运行。这个即可能发生在基于<a href="http://en.wikipedia.org/wiki/Preemption_%28computing%29">时间分享</a>管理的单核cup核心上，或者真正的并行发生在多核cup上。</h4>
+<h4><a href="http://en.wikipedia.org/wiki/Concurrency_%28computer_science%29">并发</a>是指一系列任务在同一时间运行。<!---more-->这个即可能发生在基于<a href="http://en.wikipedia.org/wiki/Preemption_%28computing%29">时间分享</a>管理的单核cup核心上，或者真正的并行发生在多核cup上。</h4>
 
 <h4>OSX和IOS提供了几个不同的APIS确保并发编程。这些APIS中的每一个都有不同的能力和限制，要合理的使用他们。他们也被归为不同的抽象水平。我们的操作性可能非常的灵活，但是这同时也带来了巨大的责任把事情做好。</h4>
 
