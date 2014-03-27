@@ -4,7 +4,7 @@
   <title><![CDATA[漫步云端]]></title>
   <link href="http://javalipengfei.github.io/atom.xml" rel="self"/>
   <link href="http://javalipengfei.github.io/"/>
-  <updated>2014-03-26T10:39:30+08:00</updated>
+  <updated>2014-03-27T11:13:48+08:00</updated>
   <id>http://javalipengfei.github.io/</id>
   <author>
     <name><![CDATA[李鹏飞]]></name>
@@ -12,6 +12,15 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[objc 文章汇总]]></title>
+    <link href="http://javalipengfei.github.io/blog/2014/03/27/objc-wen-zhang-hui-zong/"/>
+    <updated>2014-03-27T11:07:00+08:00</updated>
+    <id>http://javalipengfei.github.io/blog/2014/03/27/objc-wen-zhang-hui-zong</id>
+    <content type="html"><![CDATA[<h3>昨天发现一个翻译小组已经把文章全部翻译出来了，质量比我的强多了，太伟大了，给32个赞。这是汇总的<a href="http://iosinit.com/?p=787">网址</a>,慢慢学习中。</h3>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[并发编程:APIs和挑战]]></title>
